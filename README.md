@@ -1,8 +1,16 @@
 # Fast Track to Rust
 
-This repository contains the source code for the final version of the Rustle
-program, developed during the Fast Track to Rust online course.
+This Rustle GitHub repository contains the source code for the Rustle program,
+developed over the course of the [Fast Track to Rust] book.
 
-Read the course at **https://freddiehaddad.github.io/fast-track-to-rust/**
+## Why the Name Rustle?
 
-Find the source code at **https://github.com/freddiehaddad/fast-track-to-rust**
+It's a play on the word "rust" and the sound of leaves rustling, suggesting the
+program's ability to search through data efficiently.
+
+## Contact
+
+For questions or comments, please start a [discussion on GitHub].
+
+[Fast Track to Rust]: https://freddiehaddad.github.io/fast-track-to-rust
+[discussion on GitHub]: https://github.com/freddiehaddad/rustle/discussions
