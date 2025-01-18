@@ -95,13 +95,13 @@ struct Cli {
 }
 
 // Result from a thread
-struct GrepSuccess {
+struct RustleSuccess {
     intervals: Vec<Interval<usize>>,
     lines: Vec<String>,
 }
 
 // Result from a failed thread
-struct GrepFailure {
+struct RustleFailure {
     error: String,
 }
 
@@ -131,7 +131,7 @@ fn main() {
                 let filename = match file.to_str() {
                     Some(filename) => filename,
                     None => {
-                        return Err(GrepFailure {
+                        return Err(RustleFailure {
                             error: format!(
                                 "Invalid filename: {}",
                                 file.display()
@@ -141,7 +141,7 @@ fn main() {
                 };
 
                 // attempt to open the file
-                File::open(filename).map_err(|e| GrepFailure {
+                File::open(filename).map_err(|e| RustleFailure {
                     error: format!("Error opening {filename}: {e}"),
                 })
             })
@@ -160,7 +160,7 @@ fn main() {
                         after_context,
                     ) {
                         Ok(intervals) => intervals,
-                        Err(_) => return Err(GrepFailure {
+                        Err(_) => return Err(RustleFailure {
                             error: String::from(
                                 "An error occurred while creating intervals",
                             ),
@@ -169,7 +169,7 @@ fn main() {
 
                     // merge overlapping intervals
                     let intervals = merge_intervals(intervals);
-                    Ok(GrepSuccess { intervals, lines })
+                    Ok(RustleSuccess { intervals, lines })
                 })
             })
             .collect();

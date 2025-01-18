@@ -1,6 +1,6 @@
 # Fast Track to Rust
 
-This repository contains the source code for the final version of the Grep
+This repository contains the source code for the final version of the Rustle
 program, developed during the Fast Track to Rust online course.
 
 Read the course at **https://freddiehaddad.github.io/fast-track-to-rust/**
