@@ -7,6 +7,7 @@ use std::io::Read;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::exit;
+use std::sync::mpsc::channel;
 use std::thread;
 
 mod interval;
@@ -124,76 +125,79 @@ fn main() {
         }
     };
 
+    // create the mpsc channel
+    let (tx, rx) = channel::<Result<RustleSuccess, RustleFailure>>();
+
+    // create a non-scoped thread for processing incoming messages
+    let handle = thread::spawn(move || {
+        // process all the results
+        while let Ok(result) = rx.recv() {
+            match result {
+                Ok(result) => {
+                    print_results(result.intervals, result.lines, line_number)
+                }
+                Err(e) => eprintln!("{}", e.error),
+            };
+        }
+    });
+
     thread::scope(|s| {
-        let handles: Vec<_> = files
-            .iter()
-            .map(|file| {
+        for file in &files {
+            s.spawn(|| {
+                // check if valid filename
                 let filename = match file.to_str() {
                     Some(filename) => filename,
                     None => {
-                        return Err(RustleFailure {
+                        return tx.send(Err(RustleFailure {
                             error: format!(
                                 "Invalid filename: {}",
                                 file.display()
                             ),
-                        })
+                        }))
                     }
                 };
 
                 // attempt to open the file
-                File::open(filename).map_err(|e| RustleFailure {
-                    error: format!("Error opening {filename}: {e}"),
-                })
-            })
-            .map_ok(|file| {
-                // only spawn a thread for accessible file
-                s.spawn(|| {
-                    let lines = read_file(file);
+                let handle = match File::open(filename) {
+                    Ok(handle) => handle,
+                    Err(e) => {
+                        return tx.send(Err(RustleFailure {
+                            error: format!("Error opening {filename}: {e}"),
+                        }))
+                    }
+                };
 
-                    // store the 0-based line number for any matched line
-                    let match_lines = find_matching_lines(&lines, &regex);
+                // process a file
+                let lines = read_file(handle);
 
-                    // create intervals of the form [a,b] with the before/after context
-                    let intervals = match create_intervals(
+                // store the 0-based line number for any matched line
+                let match_lines = find_matching_lines(&lines, &regex);
+
+                // create intervals of the form [a,b] with the before/after context
+                let intervals =
+                    match create_intervals(
                         match_lines,
                         before_context,
                         after_context,
                     ) {
                         Ok(intervals) => intervals,
-                        Err(_) => return Err(RustleFailure {
+                        Err(_) => return tx.send(Err(RustleFailure {
                             error: String::from(
                                 "An error occurred while creating intervals",
                             ),
-                        }),
+                        })),
                     };
 
-                    // merge overlapping intervals
-                    let intervals = merge_intervals(intervals);
-                    Ok(RustleSuccess { intervals, lines })
-                })
-            })
-            .collect();
-
-        // process all the results
-        for handle in handles {
-            let result = match handle {
-                Ok(scoped_join_handle) => scoped_join_handle,
-                Err(e) => {
-                    eprintln!("{}", e.error);
-                    continue;
-                }
-            };
-
-            if let Ok(result) = result.join() {
-                match result {
-                    Ok(result) => print_results(
-                        result.intervals,
-                        result.lines,
-                        line_number,
-                    ),
-                    Err(e) => eprintln!("{}", e.error),
-                };
-            };
+                // merge overlapping intervals
+                let intervals = merge_intervals(intervals);
+                tx.send(Ok(RustleSuccess { intervals, lines }))
+            });
         }
     });
+
+    // drop the last sender to stop rx from waiting for messages
+    drop(tx);
+
+    // prevent main from returning until all results are processed
+    let _ = handle.join();
 }
