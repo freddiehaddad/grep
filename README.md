@@ -3,7 +3,8 @@
 This Rustle GitHub repository contains the source code for the Rustle program,
 developed over the course of the [Fast Track to Rust] book.
 
-The [`mpsc`] branch holds the completed solution for the multithreaded exercise.
+The [`mpsc`] branch holds the completed solution for the asynchronous
+multithreaded exercise.
 
 ## Why the Name Rustle?
 
