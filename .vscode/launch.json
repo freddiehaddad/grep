@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "codelldb",
+      "request": "launch",
+      "name": "Debug Rust Project",
+      "program": "${workspaceFolder}/target/debug/rustle.exe",
+      "args": [
+        "--line-number",
+        "--before-context=1",
+        "--after-context=1",
+        "(little)|(all)",
+        "poem.txt",
+        "missing_file.txt",
+        "scoped_threads.txt"
+      ],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
