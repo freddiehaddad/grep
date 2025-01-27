@@ -15,6 +15,6 @@ program's ability to search through data efficiently.
 
 For questions or comments, please start a [discussion on GitHub].
 
-[Fast Track to Rust]: https://freddiehaddad.github.io/fast-track-to-rust
+[discussion on github]: https://github.com/freddiehaddad/rustle/discussions
+[fast track to rust]: https://freddiehaddad.github.io/fast-track-to-rust
 [`mpsc`]: https://github.com/freddiehaddad/rustle/tree/mpsc
-[discussion on GitHub]: https://github.com/freddiehaddad/rustle/discussions
